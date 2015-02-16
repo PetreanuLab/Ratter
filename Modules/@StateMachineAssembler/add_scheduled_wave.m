@@ -207,6 +207,9 @@ function [sma, sched_wave_name] = add_scheduled_wave(sma, varargin)
      'trigger_on_up'      ''    ;  ...
      'untrigger_on_down'  ''    ;  ...
      'no_wave_events'      0    ;  ...
+     'is_ao'               0    ;  ... % if non-zero, AO sched wave
+     'AOut'                0    ;  ... % AOut port num, (1 or 2)
+     'two_by_n_matrix'     zeros(2,0); ... % aout wave
    }; parseargs(varargin, pairs);
 
    %     DOut is a friendlier way of specifying dio_line. It takes e.g. the
@@ -244,6 +247,9 @@ function [sma, sched_wave_name] = add_scheduled_wave(sma, varargin)
      if no_wave_events, % don't generate _In and _Out columns for this wave
        in_col  = 0;
        out_col = 0;
+       elseif is_ao % for ao_sched_wave
+         in_col = 0;
+         out_col = 0;
      else
        % We'll add columns for the In and Out events of this sched wave,
        % and we'll put them right behind the Tup:
@@ -342,11 +348,16 @@ function [sma, sched_wave_name] = add_scheduled_wave(sma, varargin)
    sma.sched_waves(snum).loop              = loop;
    sma.sched_waves(snum).trigger_on_up     = trigger_on_up;
    sma.sched_waves(snum).untrigger_on_down = untrigger_on_down;
-   
+    sma.sched_waves(snum).is_ao             = is_ao; 
+    sma.sched_waves(snum).AOut              = AOut;  
+    sma.sched_waves(snum).two_by_n_matrix   = two_by_n_matrix;
+
    % If any of the sched wave properties requiring more than 8 columns
    % have been asked for, request all 11 columns:
-   if loop ~= 0 || ~isempty(trigger_on_up) || ~isempty(untrigger_on_down),
-      sma.dio_sched_wave_cols = 11;
+   if ~is_ao
+       if loop ~= 0 || ~isempty(trigger_on_up) || ~isempty(untrigger_on_down),
+           sma.dio_sched_wave_cols = 11;
+       end;
    end;
 
    
