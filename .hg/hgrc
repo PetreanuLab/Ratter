@@ -1,0 +1,2 @@
+[paths]
+default = ssh://nbonacchi@hg.neuro.fchampalimaud.org//var/hg/mainenlab/experport
