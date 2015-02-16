@@ -14,6 +14,8 @@
 %
 %                Sample Rate:  200000
 function [sm] = RTLSoundMachine(host,port,def_card)
+global bDISABLESOUND % BA DISABLE SOUND CARD SUPPORT
+
   sm.host = 'localhost';
   sm.port = 3334;
   sm.sample_rate = 200000; 
@@ -36,12 +38,14 @@ function [sm] = RTLSoundMachine(host,port,def_card)
       error('Please pass 3 or fewer arguments to RTLSoundMachine');
   end;
   
-  sm.handle = SoundTrigClient('create', sm.host, sm.port);
-  sm = class(sm, 'RTLSoundMachine');
-  % just to make sure to explode here if the connection failed
-  SoundTrigClient('connect', sm.handle);
-  ChkConn(sm);
-  sm = SetCard(sm, sm.def_card);
+  if ~bDISABLESOUND % BA DISABLE SOUND CARD SUPPORT
+      sm.handle = SoundTrigClient('create', sm.host, sm.port);
+      sm = class(sm, 'RTLSoundMachine');
+      % just to make sure to explode here if the connection failed
+      SoundTrigClient('connect', sm.handle);
+      ChkConn(sm);
+      sm = SetCard(sm, sm.def_card);
+  end
   return;
 
 

@@ -1,5 +1,6 @@
 function [ret, ret2] = MachinesSection(obj, varargin)
-
+global bDISABLESOUND
+bDISABLESOUND = 1; % BA Disable calls to sound card (IF YOU DON'T HAVE THE HARDWARE)
 global fake_rp_box;
 global state_machine_server;
 global sound_machine_server;
@@ -69,14 +70,17 @@ switch action,
     % --- Setting up the sound server:
     SoloParamHandle(obj, 'sound_machine');
     if     fake_rp_box==2 || fake_rp_box==20,   sound_machine.value = RTLSoundMachine(sound_machine_server); % <~> added 20, 2008.June.25
-        if GetNumCards(value(sound_machine))-1 < value(card_slot),
-            error('Have sound card slots 0 through %d, yet setting "RIGS; card_slot" asks for slot %d\n', ...
-                GetNumCards(value(sound_machine))-1, value(card_slot));
-        end;
-        SetCard(value(sound_machine), value(card_slot));
+        % %  BA DISABLE SOUND CARD SUPPORT cause it doesnºt exit in this hardware
+        if ~bDISABLESOUND
+            if GetNumCards(value(sound_machine))-1 < value(card_slot),
+                error('Have sound card slots 0 through %d, yet setting "RIGS; card_slot" asks for slot %d\n', ...
+                    GetNumCards(value(sound_machine))-1, value(card_slot));
+            end;
+            SetCard(value(sound_machine), value(card_slot));
+        end
     elseif fake_rp_box==3,   sound_machine.value = softsound;
     else
-      error('Sorry, can only work with fake_rp_box (from mystartup.m) equal to 2, 20, or 3'); % <~> added 20, 2008.June.25
+        error('Sorry, can only work with fake_rp_box (from mystartup.m) equal to 2, 20, or 3'); % <~> added 20, 2008.June.25
     end;
     
     SoloParamHandle(obj, 'freshly_initialized_machines', 'value', 0);
@@ -110,7 +114,9 @@ switch action,
   case 'initialize_machines',
     
     state_machine.value = Initialize(value(state_machine)); %#ok<NODEF>
+    if ~bDISABLESOUND
     sound_machine.value = Initialize(value(sound_machine)); %#ok<NODEF>
+    end
     % --- connect StateMachine and SoundMachine if necessary:       
     if fake_rp_box == 3,
       SetTrigoutCallback(value(state_machine), @playsound, value(sound_machine));
